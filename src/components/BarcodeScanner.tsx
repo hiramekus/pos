@@ -51,12 +51,12 @@ const BarcodeScanner = ({ onScan, onClose }: BarcodeScannerProps) => {
 
       try {
         await html5QrCode.start(
-          { facingMode: "environment" },
+          { facingMode: "user" },
           {
             fps: 15,
             qrbox: getBarcodeQrbox,
             aspectRatio: 4 / 3,
-            disableFlip: true,
+            disableFlip: false,
           },
           (decodedText) => {
             if (isMounted) onScan(decodedText)
