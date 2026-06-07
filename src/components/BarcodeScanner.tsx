@@ -10,7 +10,6 @@ interface BarcodeScannerProps {
 }
 
 const supportedBarcodeFormats = [
-  Html5QrcodeSupportedFormats.QR_CODE,
   Html5QrcodeSupportedFormats.EAN_13,
   Html5QrcodeSupportedFormats.EAN_8,
   Html5QrcodeSupportedFormats.UPC_A,
@@ -20,14 +19,18 @@ const supportedBarcodeFormats = [
   Html5QrcodeSupportedFormats.CODE_93,
   Html5QrcodeSupportedFormats.ITF,
   Html5QrcodeSupportedFormats.CODABAR,
-  Html5QrcodeSupportedFormats.DATA_MATRIX,
-  Html5QrcodeSupportedFormats.PDF_417,
 ]
 
 const getBarcodeQrbox = (viewfinderWidth: number, viewfinderHeight: number) => ({
-  width: Math.floor(Math.min(viewfinderWidth * 0.88, 680)),
-  height: Math.floor(Math.min(viewfinderHeight * 0.72, 420)),
+  width: Math.floor(Math.min(viewfinderWidth * 0.92, 760)),
+  height: Math.floor(Math.min(viewfinderHeight * 0.48, 340)),
 })
+
+const frontCameraConstraints: MediaTrackConstraints = {
+  facingMode: { ideal: 'user' },
+  width: { ideal: 1920 },
+  height: { ideal: 1080 },
+}
 
 const BarcodeScanner = ({ onScan, onClose }: BarcodeScannerProps) => {
   const scannerRef = useRef<Html5Qrcode | null>(null)
@@ -51,11 +54,11 @@ const BarcodeScanner = ({ onScan, onClose }: BarcodeScannerProps) => {
 
       try {
         await html5QrCode.start(
-          { facingMode: "user" },
+          frontCameraConstraints,
           {
-            fps: 15,
+            fps: 20,
             qrbox: getBarcodeQrbox,
-            aspectRatio: 4 / 3,
+            aspectRatio: 16 / 9,
             disableFlip: false,
           },
           (decodedText) => {
