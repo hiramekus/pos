@@ -1,35 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import {
-  Html5Qrcode,
-  Html5QrcodeSupportedFormats,
-} from 'html5-qrcode'
+import { Html5Qrcode } from 'html5-qrcode'
 
 interface BarcodeScannerProps {
   onScan: (decodedText: string) => void
   onClose?: () => void
-}
-
-const supportedBarcodeFormats = [
-  Html5QrcodeSupportedFormats.EAN_13,
-  Html5QrcodeSupportedFormats.EAN_8,
-  Html5QrcodeSupportedFormats.UPC_A,
-  Html5QrcodeSupportedFormats.UPC_E,
-  Html5QrcodeSupportedFormats.CODE_128,
-  Html5QrcodeSupportedFormats.CODE_39,
-  Html5QrcodeSupportedFormats.CODE_93,
-  Html5QrcodeSupportedFormats.ITF,
-  Html5QrcodeSupportedFormats.CODABAR,
-]
-
-const getBarcodeQrbox = (viewfinderWidth: number, viewfinderHeight: number) => ({
-  width: Math.floor(Math.min(viewfinderWidth * 0.92, 760)),
-  height: Math.floor(Math.min(viewfinderHeight * 0.48, 340)),
-})
-
-const frontCameraConstraints: MediaTrackConstraints = {
-  facingMode: { ideal: 'user' },
-  width: { ideal: 1920 },
-  height: { ideal: 1080 },
 }
 
 const BarcodeScanner = ({ onScan, onClose }: BarcodeScannerProps) => {
@@ -39,11 +13,7 @@ const BarcodeScanner = ({ onScan, onClose }: BarcodeScannerProps) => {
 
   useEffect(() => {
     let isMounted = true
-    const html5QrCode = new Html5Qrcode(elementId, {
-      formatsToSupport: supportedBarcodeFormats,
-      useBarCodeDetectorIfSupported: true,
-      verbose: false,
-    })
+    const html5QrCode = new Html5Qrcode(elementId)
     scannerRef.current = html5QrCode
 
     const startScanner = async () => {
@@ -54,13 +24,8 @@ const BarcodeScanner = ({ onScan, onClose }: BarcodeScannerProps) => {
 
       try {
         await html5QrCode.start(
-          frontCameraConstraints,
-          {
-            fps: 20,
-            qrbox: getBarcodeQrbox,
-            aspectRatio: 16 / 9,
-            disableFlip: false,
-          },
+          { facingMode: "user" },
+          undefined,
           (decodedText) => {
             if (isMounted) onScan(decodedText)
           },
