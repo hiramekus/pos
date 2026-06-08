@@ -409,16 +409,16 @@ h1, h2, h3 {
 }
 
 .scanner-dialog {
-  width: min(100%, 960px);
+  width: min(100%, 720px);
 }
 
 .scanner-dialog .scanner-view {
-  min-height: min(72vh, 620px);
+  min-height: min(60vh, 480px);
 }
 
 .scanner-dialog #barcode-reader-target,
 .scanner-dialog #barcode-reader-target video {
-  min-height: min(72vh, 620px);
+  min-height: min(60vh, 480px);
 }
 
 .register-dialog {
@@ -517,7 +517,7 @@ h1, h2, h3 {
   .scanner-dialog .scanner-view,
   .scanner-dialog #barcode-reader-target,
   .scanner-dialog #barcode-reader-target video {
-    min-height: 68vh;
+    min-height: 54vh;
   }
 
   .register-panel-header {

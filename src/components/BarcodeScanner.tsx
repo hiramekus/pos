@@ -6,6 +6,11 @@ interface BarcodeScannerProps {
   onClose?: () => void
 }
 
+const getFocusedBarcodeQrbox = (viewfinderWidth: number, viewfinderHeight: number) => ({
+  width: Math.floor(Math.min(viewfinderWidth * 0.68, 420)),
+  height: Math.floor(Math.min(viewfinderHeight * 0.32, 180)),
+})
+
 const BarcodeScanner = ({ onScan, onClose }: BarcodeScannerProps) => {
   const scannerRef = useRef<Html5Qrcode | null>(null)
   const [initError, setInitError] = useState<string | null>(null)
@@ -24,8 +29,11 @@ const BarcodeScanner = ({ onScan, onClose }: BarcodeScannerProps) => {
 
       try {
         await html5QrCode.start(
-          { facingMode: "environment" },
-          undefined,
+          { facingMode: "user" },
+          {
+            fps: 10,
+            qrbox: getFocusedBarcodeQrbox,
+          },
           (decodedText) => {
             if (isMounted) onScan(decodedText)
           },
