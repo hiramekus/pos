@@ -27,7 +27,7 @@ function App() {
       <header className="app-header">
         <div className="brand-mark">
           <div className="brand-square">POS<br />REG</div>
-          <h1 className="brand-title">どんきょん商店 POS</h1>
+          <h1 className="brand-title">ひらめ商店 POS</h1>
         </div>
         <nav className="top-nav">
           <button 
