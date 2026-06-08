@@ -24,7 +24,7 @@ const BarcodeScanner = ({ onScan, onClose }: BarcodeScannerProps) => {
 
       try {
         await html5QrCode.start(
-          { facingMode: "user" },
+          { facingMode: "environment" },
           undefined,
           (decodedText) => {
             if (isMounted) onScan(decodedText)
