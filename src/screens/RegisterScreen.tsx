@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react'
-import { Plus, Minus, Camera, CheckCircle2, ShoppingBag, ReceiptText } from 'lucide-react'
+import { Plus, Minus, Camera, CheckCircle2, ShoppingBag, ReceiptText, LoaderCircle } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { Product, CartItem } from '../types'
 import BarcodeScanner from '../components/BarcodeScanner'
@@ -18,6 +18,7 @@ const audioUrls = [
 const RegisterScreen = () => {
   const [cart, setCart] = useState<CartItem[]>([])
   const [isScannerActive, setIsScannerActive] = useState(false)
+  const [checkoutStatus, setCheckoutStatus] = useState<'idle' | 'processing' | 'succeeded'>('idle')
   const [lastScannedCode, setLastScannedCode] = useState<string | null>(null)
   const [showRegForm, setShowRegForm] = useState(false)
   const [regData, setRegData] = useState({ name: '', price: '' })
@@ -156,9 +157,10 @@ const RegisterScreen = () => {
   }
 
   const handleCheckout = async () => {
-    if (cart.length === 0) return
+    if (cart.length === 0 || checkoutStatus !== 'idle') return
 
     try {
+      setCheckoutStatus('processing')
       const { data: sale, error: saleError } = await supabase
         .from('sales')
         .insert({ total_amount: totalAmount })
@@ -181,19 +183,23 @@ const RegisterScreen = () => {
 
       if (itemsError) throw itemsError
 
+      setCheckoutStatus('succeeded')
       await playAudioUntilEnded(checkoutCompleteVoiceUrl)
       setCart([])
       lastAcceptedBarcodeRef.current = null
+      setCheckoutStatus('idle')
     } catch (err) {
       console.error(err)
       alert('エラーが発生しました。オフラインモードか、Supabaseの設定を確認してください。')
       
       // Fallback for local play if Supabase fails
       if (confirm('デモモードとして会計を完了しますか？（データは保存されません）')) {
+         setCheckoutStatus('succeeded')
          await playAudioUntilEnded(checkoutCompleteVoiceUrl)
          setCart([])
          lastAcceptedBarcodeRef.current = null
       }
+      setCheckoutStatus('idle')
     }
   }
 
@@ -312,7 +318,7 @@ const RegisterScreen = () => {
         )}
       </section>
 
-      <aside className="register-panel payment-panel">
+      <aside className={`register-panel payment-panel ${checkoutStatus !== 'idle' ? `payment-panel-${checkoutStatus}` : ''}`}>
         <div>
           <div className="section-kicker">PAYMENT</div>
           <h2 className="section-title">お支払い</h2>
@@ -339,10 +345,35 @@ const RegisterScreen = () => {
         <button 
           className="button checkout-button" 
           onClick={handleCheckout}
-          disabled={cart.length === 0}
+          disabled={cart.length === 0 || checkoutStatus !== 'idle'}
         >
-          <CheckCircle2 size={34} /> 会計へ進む
+          {checkoutStatus === 'processing' ? (
+            <LoaderCircle size={34} className="button-spinner" />
+          ) : (
+            <CheckCircle2 size={34} />
+          )}
+          {checkoutStatus === 'processing' ? '処理中' : '会計へ進む'}
         </button>
+
+        {checkoutStatus !== 'idle' && (
+          <div className={`checkout-status checkout-status-${checkoutStatus}`} aria-live="polite">
+            <div className="checkout-status-icon">
+              {checkoutStatus === 'processing' ? (
+                <LoaderCircle size={72} />
+              ) : (
+                <CheckCircle2 size={78} />
+              )}
+            </div>
+            <div className="checkout-status-copy">
+              <div className="checkout-status-title">
+                {checkoutStatus === 'processing' ? '会計処理中' : '会計完了'}
+              </div>
+              <div className="checkout-status-text">
+                {checkoutStatus === 'processing' ? 'お支払いを確定しています' : 'ありがとうございました'}
+              </div>
+            </div>
+          </div>
+        )}
       </aside>
     </div>
   )
